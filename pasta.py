@@ -24,8 +24,8 @@ class Pasta:
         self.model = gtk.ListStore(str)
 
         self.model.append(['Welcome to Pasta'])
-        self.model.append(['Pasta is a clipboard-manager'])
-        self.model.append(['and this is the content of my clipboard'])
+        self.model.append(['Pasta is a minimal clipboard-manager'])
+        self.model.append(['select a line and press Enter\nto store it on your clipboard'])
 
         self.window = gtk.Window()
         self.window.set_decorated(False)
