@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import gtk
 import keybinder
 
@@ -81,6 +83,6 @@ class Pasta:
 
 if __name__ == "__main__":
     pasta = Pasta()
-    keybinder.bind("<Control><Alt>P", lambda: pasta.show())
+    keybinder.bind("<Control><Shift>V", lambda: pasta.show())
     gtk.main()
 
