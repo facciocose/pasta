@@ -31,7 +31,6 @@ class Pasta:
         self.model.append(['select a line and press Enter\nto store it on your clipboard'])
 
         self.window = gtk.Window()
-        self.window.stick()
         self.window.set_resizable(False)
         self.window.set_skip_pager_hint(True)
         self.window.set_skip_taskbar_hint(True)
@@ -83,9 +82,11 @@ class Pasta:
         gobject.timeout_add(100, self.present)
 
     def present(self):
+        self.window.stick()
         self.window.present()
         selection = self.tree.get_selection()
         selection.select_path(0)
+        self.tree.set_cursor(0)
     
 if __name__ == "__main__":
     pasta = Pasta()
