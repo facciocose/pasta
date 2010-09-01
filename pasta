@@ -31,31 +31,46 @@ class Pasta:
         self.model.append(['select a line and press Enter\nto store it on your clipboard'])
 
         self.window = gtk.Window()
-        self.window.set_resizable(False)
+        self.window.set_default_size(400, -1)
+        #self.window.set_resizable(False)
         self.window.set_skip_pager_hint(True)
         self.window.set_skip_taskbar_hint(True)
         self.window.set_position(gtk.WIN_POS_CENTER)
         self.window.set_decorated(False)
         self.window.set_keep_above(True)
         self.tree = gtk.TreeView(self.model)
-
-        
+        #self.scroll = gtk.ScrolledWindow()
+        #self.scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
+                
         self.cell = gtk.CellRendererText()
         self.column = gtk.TreeViewColumn()
         self.column.pack_start(self.cell)
         self.column.set_attributes(self.cell, text=0)
         self.column.set_title('Pasta')
         self.tree.append_column(self.column)
+        self.tree.set_enable_search(False)
 
+        #self.scroll.add(self.tree)
         self.window.add(self.tree)
         self.tree.show()
+        #self.scroll.show()
         self.window.connect('key-press-event', self.hide)
+        self.window.connect('focus-out-event', self.hide2)
         self.tree.connect("select-cursor-row", self.select)
     
     def hide(self, widget, data=None):
         key = gtk.gdk.keyval_name(data.keyval)
         if key == 'Escape':
             self.window.hide()
+        if key == 'j':
+            selection = self.tree.get_selection()
+            model, selected = selection.get_selected()
+            #selection.select_path(selected+1)
+            #self.tree.set_cursor(selected+1)
+            print selected
+
+    def hide2(self, widget, data=None):
+        self.window.hide()
     
     def change(self, widget, data=None):
         text = self.get_gtk_clip()
