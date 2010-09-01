@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import gtk
+import gobject
 import keybinder
 
 class Clipboard(list):
@@ -30,23 +31,28 @@ class Pasta:
         self.model.append(['select a line and press Enter\nto store it on your clipboard'])
 
         self.window = gtk.Window()
+        self.window.stick()
+        self.window.set_resizable(False)
+        self.window.set_skip_pager_hint(True)
+        self.window.set_skip_taskbar_hint(True)
+        self.window.set_position(gtk.WIN_POS_CENTER)
         self.window.set_decorated(False)
         self.window.set_keep_above(True)
         self.tree = gtk.TreeView(self.model)
 
-        self.tree.connect("select-cursor-row", self.select)
         
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn()
-        column.pack_start(cell)
-        column.set_attributes(cell, text=0)
-        column.set_title('Pasta')
-        self.tree.append_column(column)
-        
+        self.cell = gtk.CellRendererText()
+        self.column = gtk.TreeViewColumn()
+        self.column.pack_start(self.cell)
+        self.column.set_attributes(self.cell, text=0)
+        self.column.set_title('Pasta')
+        self.tree.append_column(self.column)
+
         self.window.add(self.tree)
         self.tree.show()
         self.window.connect('key-press-event', self.hide)
-
+        self.tree.connect("select-cursor-row", self.select)
+    
     def hide(self, widget, data=None):
         key = gtk.gdk.keyval_name(data.keyval)
         if key == 'Escape':
@@ -74,10 +80,15 @@ class Pasta:
         self.set_gtk_clip(model.get_value(iter, 0))
 
     def show(self):
-        self.window.show()
-        # doesn't work :(
-        self.window.grab_focus()
-    
+        gobject.timeout_add(100, self.present)
+
+    def present(self):
+        self.window.present()
+        selection = self.tree.get_selection()
+        selection.select_path(0)
+        #self.column.focus_cell(self.cell)
+
+
     def main(self):
         gtk.main()
 
