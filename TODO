@@ -1,2 +1,2 @@
 - Vim style line editing: j,k -> up,down y,d,p -> yank,cut,paste / -> search
-- <Shift><Enter> -> store and Ctrl-V
+- <Shift><Enter> -> store and paste
