@@ -86,12 +86,7 @@ class Pasta:
         self.window.present()
         selection = self.tree.get_selection()
         selection.select_path(0)
-        #self.column.focus_cell(self.cell)
-
-
-    def main(self):
-        gtk.main()
-
+    
 if __name__ == "__main__":
     pasta = Pasta()
     keybinder.bind("<Control><Shift>V", lambda: pasta.show())
