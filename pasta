@@ -5,17 +5,17 @@ import gobject
 import keybinder
 
 class Clipboard(list):
-    def move_to_last(self, item):
+    def move_to_top(self, item):
         tmp = self.pop(item)
-        self.append(tmp)
+        self.insert(0, tmp)
         return tmp
 
     def append(self, item):
         if item in self:
-            self.move_to_last(self.index(item))
+            self.move_to_top(self.index(item))
         else:
-            if len(self) > 5:
-                del self[0]
+            #if len(self) > 5:
+                #del self[0]
             super(Clipboard, self).append(item)
 
 class Pasta:
@@ -31,7 +31,7 @@ class Pasta:
         self.model.append(['select a line and press Enter\nto store it on your clipboard'])
 
         self.window = gtk.Window()
-        self.window.set_default_size(400, -1)
+        self.window.set_default_size(400, 200)
         #self.window.set_resizable(False)
         self.window.set_skip_pager_hint(True)
         self.window.set_skip_taskbar_hint(True)
@@ -39,8 +39,8 @@ class Pasta:
         self.window.set_decorated(False)
         self.window.set_keep_above(True)
         self.tree = gtk.TreeView(self.model)
-        #self.scroll = gtk.ScrolledWindow()
-        #self.scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
+        self.scroll = gtk.ScrolledWindow()
+        self.scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
                 
         self.cell = gtk.CellRendererText()
         self.column = gtk.TreeViewColumn()
@@ -50,12 +50,12 @@ class Pasta:
         self.tree.append_column(self.column)
         self.tree.set_enable_search(False)
 
-        #self.scroll.add(self.tree)
-        self.window.add(self.tree)
+        self.scroll.add(self.tree)
+        self.window.add(self.scroll)
         self.tree.show()
-        #self.scroll.show()
+        self.scroll.show()
         self.window.connect('key-press-event', self.hide)
-        self.window.connect('focus-out-event', self.hide2)
+        #self.window.connect('focus-out-event', self.hide2)
         self.tree.connect("select-cursor-row", self.select)
     
     def hide(self, widget, data=None):
@@ -77,8 +77,11 @@ class Pasta:
         if text:
             self.pasta_clip.append(text)
             self.model.clear()
-            for i in reversed(self.pasta_clip):
-                self.model.append([i])
+            for i in self.pasta_clip:
+                if len(i) > 50:
+                    self.model.append([i[:50] + ' [...]'])
+                else:
+                    self.model.append([i])
             self.window.hide()
     
     def get_gtk_clip(self):
@@ -91,7 +94,11 @@ class Pasta:
     def select(self, widget, data=None):
         sel = self.tree.get_selection()
         model, iter = sel.get_selected()
-        self.set_gtk_clip(model.get_value(iter, 0))
+        rows = sel.get_selected_rows()
+        item = model.get_path(iter)[0]
+        print item
+        print self.pasta_clip
+        self.set_gtk_clip(self.pasta_clip[item])
 
     def show(self):
         gobject.timeout_add(100, self.present)
