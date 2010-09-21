@@ -3,6 +3,7 @@
 import gtk
 import gobject
 import keybinder
+import textwrap
 
 class Clipboard(list):
     def move_to_top(self, item):
@@ -16,7 +17,12 @@ class Clipboard(list):
         else:
             #if len(self) > 5:
                 #del self[0]
-            super(Clipboard, self).append(item)
+            super(Clipboard, self).insert(0, item)
+
+def normalize(text):
+    max_len = 80
+    wrap = textwrap.wrap(text, max_len, subsequent_indent='  ')
+    return "\n".join(wrap[:2])
 
 class Pasta:
     def __init__(self):
@@ -31,7 +37,7 @@ class Pasta:
         self.model.append(['select a line and press Enter\nto store it on your clipboard'])
 
         self.window = gtk.Window()
-        self.window.set_default_size(400, 200)
+        self.window.set_default_size(100, 200)
         #self.window.set_resizable(False)
         self.window.set_skip_pager_hint(True)
         self.window.set_skip_taskbar_hint(True)
@@ -79,7 +85,8 @@ class Pasta:
             self.model.clear()
             for i in self.pasta_clip:
                 if len(i) > 50:
-                    self.model.append([i[:50] + ' [...]'])
+                    self.model.append([normalize(i)])
+                    #[i[:50] + ' [...]'])
                 else:
                     self.model.append([i])
             self.window.hide()
@@ -96,8 +103,6 @@ class Pasta:
         model, iter = sel.get_selected()
         rows = sel.get_selected_rows()
         item = model.get_path(iter)[0]
-        print item
-        print self.pasta_clip
         self.set_gtk_clip(self.pasta_clip[item])
 
     def show(self):
@@ -112,6 +117,6 @@ class Pasta:
     
 if __name__ == "__main__":
     pasta = Pasta()
-    keybinder.bind("<Control><Shift>V", lambda: pasta.show())
+    keybinder.bind("<Mod4>V", lambda: pasta.show())
     gtk.main()
 
