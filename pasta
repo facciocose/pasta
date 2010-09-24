@@ -4,6 +4,32 @@ import gtk
 import gobject
 import keybinder
 import textwrap
+import os
+import ConfigParser
+
+def create_config():
+    pass
+
+def read_config():
+    pass
+
+def init():
+    conf_dir = os.path.join(os.getenv('XDG_CONFIG_HOME', os.environ['HOME'] +
+        '/.config'), 'pasta')
+    if not os.path.exists(conf_dir):
+        os.mkdir(conf_dir)
+    conf_file = os.path.join(conf_dir, 'config')
+    cfg = ConfigParser.RawConfigParser()
+    if os.path.exists(conf_file):
+        cfg.read(conf_file)
+    else:
+        cfg.add_section('main')
+        cfg.set('main', 'keybinding', '<Mod4>V')
+        with open(conf_file, 'wb') as cfile:
+            cfg.write(cfile)
+    print cfg.get('main', 'keybinding')
+
+
 
 class Clipboard(list):
     def move_to_top(self, item):
@@ -116,7 +142,8 @@ class Pasta:
         self.tree.set_cursor(0)
     
 if __name__ == "__main__":
-    pasta = Pasta()
-    keybinder.bind("<Mod4>V", lambda: pasta.show())
-    gtk.main()
+    #pasta = Pasta()
+    #keybinder.bind("<Mod4>V", lambda: pasta.show())
+    #gtk.main()
+    init()
 
