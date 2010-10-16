@@ -3,20 +3,26 @@
 import gtk
 import gobject
 import keybinder
+import textwrap
 
 class Clipboard(list):
-    def move_to_last(self, item):
+    def move_to_top(self, item):
         tmp = self.pop(item)
-        self.append(tmp)
+        self.insert(0, tmp)
         return tmp
 
     def append(self, item):
         if item in self:
-            self.move_to_last(self.index(item))
+            self.move_to_top(self.index(item))
         else:
-            if len(self) > 5:
+            if len(self) >= 10:
                 del self[0]
-            super(Clipboard, self).append(item)
+            super(Clipboard, self).insert(0, item)
+
+def normalize(text):
+    max_len = 80
+    wrap = textwrap.wrap(text, max_len, subsequent_indent='  ')
+    return "\n".join(wrap[:4])
 
 class Pasta:
     def __init__(self):
@@ -31,13 +37,17 @@ class Pasta:
         self.model.append(['select a line and press Enter\nto store it on your clipboard'])
 
         self.window = gtk.Window()
-        self.window.set_resizable(False)
+        self.window.set_default_size(100, 200)
+        #self.window.set_resizable(False)
         self.window.set_skip_pager_hint(True)
         self.window.set_skip_taskbar_hint(True)
         self.window.set_position(gtk.WIN_POS_CENTER)
         self.window.set_decorated(False)
         self.window.set_keep_above(True)
         self.tree = gtk.TreeView(self.model)
+        self.tree.set_rules_hint(True)
+        self.scroll = gtk.ScrolledWindow()
+        self.scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
 
         
         self.cell = gtk.CellRendererText()
@@ -47,8 +57,10 @@ class Pasta:
         self.column.set_title('Pasta')
         self.tree.append_column(self.column)
 
-        self.window.add(self.tree)
+        self.scroll.add(self.tree)
+        self.window.add(self.scroll)
         self.tree.show()
+        self.scroll.show()
         self.window.connect('key-press-event', self.hide)
         self.tree.connect("select-cursor-row", self.select)
     
@@ -62,8 +74,11 @@ class Pasta:
         if text:
             self.pasta_clip.append(text)
             self.model.clear()
-            for i in reversed(self.pasta_clip):
-                self.model.append([i])
+            for i in self.pasta_clip:
+                if len(i) > 80:
+                    self.model.append([normalize(i) + '[...]'])
+                else:
+                    self.model.append([i])
             self.window.hide()
     
     def get_gtk_clip(self):
@@ -76,10 +91,12 @@ class Pasta:
     def select(self, widget, data=None):
         sel = self.tree.get_selection()
         model, iter = sel.get_selected()
-        self.set_gtk_clip(model.get_value(iter, 0))
+        rows = sel.get_selected_rows()
+        item = model.get_path(iter)[0]
+        self.set_gtk_clip(self.pasta_clip[item])
 
     def show(self):
-        gobject.timeout_add(100, self.present)
+        gobject.timeout_add(100, self.present) # window focus workaround
 
     def present(self):
         self.window.stick()
@@ -90,6 +107,6 @@ class Pasta:
     
 if __name__ == "__main__":
     pasta = Pasta()
-    keybinder.bind("<Control><Shift>V", lambda: pasta.show())
+    keybinder.bind("<Control><Alt>V", lambda: pasta.show())
     gtk.main()
 
