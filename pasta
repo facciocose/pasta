@@ -16,7 +16,7 @@ class Clipboard(list):
             self.move_to_top(self.index(item))
         else:
             if len(self) >= 10:
-                del self[0]
+                del self[-1]
             super(Clipboard, self).insert(0, item)
 
 def normalize(text):
